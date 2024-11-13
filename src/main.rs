@@ -101,8 +101,6 @@ fn main() {
         ("Docker", &status.docker),
         ("Rust", &status.rust),
     ];
-
-    // Loop through each field and print in a table row format
     for (name, value) in fields.iter() {
         println!("{:<15}  {:<40}", name, value);
     }
