@@ -67,11 +67,7 @@ fn main() {
     } else if orphaned_packages.is_empty() {
         status.orphans = format!("{} no orphaned packages found", check.green());
     } else {
-        status.orphans = format!(
-            "{} failed to remove orphaned packages: {}",
-            cross.red(),
-            &orphaned_packages
-        );
+        status.orphans = format!("{} failed to remove orphaned packages: {}", cross.red(), &orphaned_packages);
     }
 
     println!("{}", "Cleaning cache directories...".yellow());
@@ -99,13 +95,13 @@ fn main() {
     println!("{:<15}  {:<40}", "Status Item", "Result");
     println!("{}", "-".repeat(60));
     let fields = [
-        &status.mirror,
-        &status.keys,
-        &status.prune,
-        &status.orphans,
-        &status.cache,
-        &status.docker,
-        &status.rust,
+        ("Mirror", &status.mirror),
+        ("Keys", &status.keys),
+        ("Prune", &status.prune),
+        ("Orphans", &status.orphans),
+        ("Cache", &status.cache),
+        ("Docker", &status.docker),
+        ("Rust", &status.rust),
     ];
 
     // Loop through each field and print in a table row format
