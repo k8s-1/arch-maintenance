@@ -92,8 +92,7 @@ fn main() {
     }
 
     println!("\n{}", "Summary:".yellow());
-    println!("{:<15}  {:<40}", "Status Item", "Result");
-    println!("{}", "-".repeat(60));
+    println!("{:<15}  {:<40}", "Status Item".yellow(), "Result".yellow());
     let fields = [
         ("Mirror", &status.mirror),
         ("Keys", &status.keys),
