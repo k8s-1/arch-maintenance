@@ -64,7 +64,7 @@ fn main() {
             &["pacman", "-Rns", &orphaned_packages, "--noconfirm"],
         )
     {
-        status.orphans = format!("{} orphaned packages removed", check.green());
+    status.orphans = format!("{} orphaned packages removed", check.green());
     } else if orphaned_packages.is_empty() {
         status.orphans = format!("{} no orphaned packages found", check.green());
     } else {
