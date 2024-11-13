@@ -68,7 +68,7 @@ fn main() {
     } else if orphaned_packages.is_empty() {
         status.orphans = format!("{} no orphaned packages found", check.green());
     } else {
-        status.orphans = format!("{} failed to remove orphaned packages", cross.red());
+        status.orphans = format!("{} failed to remove orphaned packages: {}", cross.red(), &orphaned_packages);
     }
 
     println!("{}", "Cleaning cache directories...".yellow());
