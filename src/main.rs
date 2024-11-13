@@ -1,6 +1,5 @@
 use std::process::Command;
 use colored::*;
-use std::process::ExitStatus;
 
 fn main() {
     let check = "✅";
