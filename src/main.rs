@@ -1,92 +1,119 @@
-use std::process::Command;
 use colored::*;
+use std::process::Command;
+
+#[derive(Default)]
+struct Status {
+    mirror: String,
+    keys: String,
+    prune: String,
+    orphans: String,
+    cache: String,
+    docker: String,
+    rkhunter: String,
+    rust: String,
+}
 
 fn main() {
     let check = "✅";
     let cross = "❌";
 
-    // Status messages
-    let mut mirror_status = String::new();
-    let mut keys_status = String::new();
-    let mut prune_status = String::new();
-    let mut orphans_status = String::new();
-    let mut cache_status = String::new();
-    let mut docker_status = String::new();
-    let mut rkhunter_status = String::new();
-    let mut rust_status = String::new();
+    let mut status = Status::default();
 
     println!("{}", "Updating mirror list...".yellow());
-    if run_command("sudo", &["reflector", "--verbose", "--latest", "10", "--sort", "rate", "--save", "/etc/pacman.d/mirrorlist"]) {
-        mirror_status = format!("{} mirror list updated", check.green());
+    if run_command(
+        "sudo",
+        &[
+            "reflector",
+            "--verbose",
+            "--latest",
+            "10",
+            "--sort",
+            "rate",
+            "--save",
+            "/etc/pacman.d/mirrorlist",
+        ],
+    ) {
+        status.mirror = format!("{} mirror list updated", check.green());
     } else {
-        mirror_status = format!("{} mirror list update failed", cross.red());
+        status.mirror = format!("{} mirror list update failed", cross.red());
     }
 
     println!("{}", "Updating packages and keys...".yellow());
     if run_command("yay", &["--noconfirm"]) {
-        keys_status = format!("{} packages updated", check.green());
-    } else if run_command("sudo", &["pacman-keys", "--refresh-keys"]) && run_command("yay", &["--noconfirm"]) {
-        keys_status = format!("{} packages updated and keys refreshed", check.green());
+        status.keys = format!("{} packages updated", check.green());
+    } else if run_command("sudo", &["pacman-keys", "--refresh-keys"])
+        && run_command("yay", &["--noconfirm"])
+    {
+        status.keys = format!("{} packages updated and keys refreshed", check.green());
     } else {
-        keys_status = format!("{} package update and key refresh failed", cross.red());
+        status.keys = format!("{} package update and key refresh failed", cross.red());
     }
 
     println!("{}", "Pruning cache...".yellow());
     if run_command("sudo", &["paccache", "-rk1"]) {
-        prune_status = format!("{} cache pruned", check.green());
+        status.prune = format!("{} cache pruned", check.green());
     } else {
-        prune_status = format!("{} cache prune failed", cross.red());
+        status.prune = format!("{} cache prune failed", cross.red());
     }
 
     println!("{}", "Removing orphaned packages...".yellow());
     let orphaned_packages = get_orphaned_packages();
-    if !orphaned_packages.is_empty() && run_command("sudo", &["pacman", "-Rns", &orphaned_packages, "--noconfirm"]) {
-        orphans_status = format!("{} orphaned packages removed", check.green());
+    if !orphaned_packages.is_empty()
+        && run_command(
+            "sudo",
+            &["pacman", "-Rns", &orphaned_packages, "--noconfirm"],
+        )
+    {
+        status.orphans = format!("{} orphaned packages removed", check.green());
     } else if orphaned_packages.is_empty() {
-        orphans_status = format!("{} no orphaned packages found", check.green());
+        status.orphans = format!("{} no orphaned packages found", check.green());
     } else {
-        orphans_status = format!("{} failed to remove orphaned packages", cross.red());
+        status.orphans = format!("{} failed to remove orphaned packages", cross.red());
     }
 
     println!("{}", "Cleaning cache directories...".yellow());
     if run_command("rm", &["-rf", "~/.cache/*"]) && run_command("sudo", &["rm", "-rf", "/tmp/*"]) {
-        cache_status = format!("{} cache cleaned", check.green());
+        status.cache = format!("{} cache cleaned", check.green());
     } else {
-        cache_status = format!("{} cache directory clean-up failed", cross.red());
+        status.cache = format!("{} cache directory clean-up failed", cross.red());
     }
 
     println!("{}", "Cleaning Docker objects...".yellow());
     if run_command("docker", &["system", "prune", "-af"]) {
-        docker_status = format!("{} docker cleaned", check.green());
+        status.docker = format!("{} docker cleaned", check.green());
     } else {
-        docker_status = format!("{} docker clean-up failed", cross.red());
+        status.docker = format!("{} docker clean-up failed", cross.red());
     }
 
     println!("{}", "Running rkhunter checks...".yellow());
-    if run_command("sudo", &["rkhunter", "--propupd"]) && run_command("sudo", &["rkhunter", "--update"]) &&
-       run_command("sudo", &["rkhunter", "--check", "--sk", "--rwo", "--quiet"]) {
-        rkhunter_status = format!("{} rkhunter passed", check.green());
+    if run_command("sudo", &["rkhunter", "--propupd"])
+        && run_command("sudo", &["rkhunter", "--update"])
+        && run_command("sudo", &["rkhunter", "--check", "--sk", "--rwo", "--quiet"])
+    {
+        status.rkhunter = format!("{} rkhunter passed", check.green());
     } else {
-        rkhunter_status = format!("{} rkhunter check failed... possible security issue detected!", cross.red());
+        status.rkhunter = format!(
+            "{} rkhunter check failed... possible security issue detected!",
+            cross.red()
+        );
     }
 
     println!("{}", "Updating rust...".yellow());
     if run_command("rustup", &["update"]) {
-        rust_status = format!("{} rust updated", check.green());
+        status.rust = format!("{} rust updated", check.green());
     } else {
-        rust_status = format!("{} rust update failed", cross.red());
+        status.rust = format!("{} rust update failed", cross.red());
     }
 
-    // Summary
     println!("\n{}", "Summary:".yellow());
-    println!("{}", mirror_status);
-    println!("{}", keys_status);
-    println!("{}", prune_status);
-    println!("{}", orphans_status);
-    println!("{}", cache_status);
-    println!("{}", docker_status);
-    println!("{}", rkhunter_status);
-    println!("{}", rust_status);
+    println!("{}", status.mirror);
+    println!("{}", status.keys);
+    println!("{}", status.prune);
+    println!("{}", status.orphans);
+    println!("{}", status.cache);
+    println!("{}", status.docker);
+    println!("{}", status.rkhunter);
+    println!("{}", status.rust);
 }
 
 fn run_command(cmd: &str, args: &[&str]) -> bool {
