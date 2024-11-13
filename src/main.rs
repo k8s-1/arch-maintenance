@@ -67,7 +67,11 @@ fn main() {
     } else if orphaned_packages.is_empty() {
         status.orphans = format!("{} no orphaned packages found", check.green());
     } else {
-        status.orphans = format!("{} failed to remove orphaned packages: {}", cross.red(), &orphaned_packages);
+        status.orphans = format!(
+            "{} failed to remove orphaned packages: {}",
+            cross.red(),
+            &orphaned_packages
+        );
     }
 
     println!("{}", "Cleaning cache directories...".yellow());
@@ -92,13 +96,22 @@ fn main() {
     }
 
     println!("\n{}", "Summary:".yellow());
-    println!("{}", status.mirror);
-    println!("{}", status.keys);
-    println!("{}", status.prune);
-    println!("{}", status.orphans);
-    println!("{}", status.cache);
-    println!("{}", status.docker);
-    println!("{}", status.rust);
+    println!("{:<15}  {:<40}", "Status Item", "Result");
+    println!("{}", "-".repeat(60));
+    let fields = [
+        &status.mirror,
+        &status.keys,
+        &status.prune,
+        &status.orphans,
+        &status.cache,
+        &status.docker,
+        &status.rust,
+    ];
+
+    // Loop through each field and print in a table row format
+    for (name, value) in fields.iter() {
+        println!("{:<15}  {:<40}", name, value);
+    }
 }
 
 fn run_command(cmd: &str, args: &[&str]) -> bool {
