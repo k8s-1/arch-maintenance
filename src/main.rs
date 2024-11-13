@@ -9,7 +9,7 @@ struct Status {
     orphans: String,
     cache: String,
     docker: String,
-    rkhunter: String,
+    //rkhunter: String,
     rust: String,
 }
 
@@ -85,18 +85,18 @@ fn main() {
         status.docker = format!("{} docker clean-up failed", cross.red());
     }
 
-    println!("{}", "Running rkhunter checks...".yellow());
-    if run_command("sudo", &["rkhunter", "--propupd"])
-        && run_command("sudo", &["rkhunter", "--update"])
-        && run_command("sudo", &["rkhunter", "--check", "--sk", "--rwo", "--quiet"])
-    {
-        status.rkhunter = format!("{} rkhunter passed", check.green());
-    } else {
-        status.rkhunter = format!(
-            "{} rkhunter check failed... possible security issue detected!",
-            cross.red()
-        );
-    }
+    //println!("{}", "Running rkhunter checks...".yellow());
+    //if run_command("sudo", &["rkhunter", "--propupd"])
+    //    && run_command("sudo", &["rkhunter", "--update"])
+    //    && run_command("sudo", &["rkhunter", "--check", "--sk", "--rwo", "--quiet"])
+    //{
+    //    status.rkhunter = format!("{} rkhunter passed", check.green());
+    //} else {
+    //    status.rkhunter = format!(
+    //        "{} rkhunter check failed... possible security issue detected!",
+    //        cross.red()
+    //    );
+    //}
 
     println!("{}", "Updating rust...".yellow());
     if run_command("rustup", &["update"]) {
@@ -112,7 +112,7 @@ fn main() {
     println!("{}", status.orphans);
     println!("{}", status.cache);
     println!("{}", status.docker);
-    println!("{}", status.rkhunter);
+    //println!("{}", status.rkhunter);
     println!("{}", status.rust);
 }
 
