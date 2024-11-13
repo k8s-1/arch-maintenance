@@ -91,8 +91,7 @@ fn main() {
         status.rust = format!("{} rust update failed", cross.red());
     }
 
-    println!("\n{}", "Summary:".yellow());
-    println!("{:<15}  {:<40}", "Status Item".yellow(), "Result".yellow());
+    println!("{:<15}  {:<40}", "Item".yellow(), "Result".yellow());
     let fields = [
         ("Mirror", &status.mirror),
         ("Keys", &status.keys),
