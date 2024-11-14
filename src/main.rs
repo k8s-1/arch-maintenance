@@ -90,21 +90,19 @@ fn main() {
                     orphaned_packages
                 ),
             }
-
         }),
     );
-
 
     let prune_handle = spawn_task(
         Arc::clone(&status),
         "prune",
         Box::new(|| {
-            println!("{}", "Pruning cache...".yellow());
-            if utils::run_command("sudo", &["paccache", "-rk1"]) {
-                format!("{} cache pruned", check.green())
-            } else {
-                format!("{} cache prune failed", cross.red())
-            }
+            run_task(
+                "Pruning cache...",
+                vec![("sudo", &["paccache", "-rk1"])],
+                "cache pruned",
+                "cache prune failed",
+            )
         }),
     );
 
@@ -112,14 +110,15 @@ fn main() {
         Arc::clone(&status),
         "cache",
         Box::new(|| {
-            println!("{}", "Cleaning cache directories...".yellow());
-            if utils::run_command("rm", &["-rf", "~/.cache/*"])
-                && utils::run_command("sudo", &["rm", "-rf", "/tmp/*"])
-            {
-                format!("{} cache cleaned", check.green())
-            } else {
-                format!("{} cache directory clean-up failed", cross.red())
-            }
+            run_task(
+                "Cleaning cache directories...",
+                vec![
+                    ("rm", &["-rf", "~/.cache/*"]),
+                    ("sudo", &["rm", "-rf", "/tmp/*"]),
+                ],
+                "cache cleaned",
+                "cache directory clean-up failed",
+            )
         }),
     );
 
@@ -127,12 +126,12 @@ fn main() {
         Arc::clone(&status),
         "docker",
         Box::new(|| {
-            println!("{}", "Cleaning Docker objects...".yellow());
-            if utils::run_command("docker", &["system", "prune", "-af"]) {
-                format!("{} docker cleaned", check.green())
-            } else {
-                format!("{} docker clean-up failed", cross.red())
-            }
+            run_task(
+                "Cleaning Docker objects...",
+                vec![("docker", &["system", "prune", "-af"])],
+                "docker cleaned",
+                "docker clean-up failed",
+            )
         }),
     );
 
@@ -140,12 +139,12 @@ fn main() {
         Arc::clone(&status),
         "rust",
         Box::new(|| {
-            println!("{}", "Updating rust...".yellow());
-            if utils::run_command("rustup", &["update"]) {
-                format!("{} rust updated", check.green())
-            } else {
-                format!("{} rust update failed", cross.red())
-            }
+            run_task(
+                "Updating rust...",
+                vec![("rustup", &["update"])],
+                "rust updated",
+                "rust update failed",
+            )
         }),
     );
 
@@ -156,4 +155,23 @@ fn main() {
     let _ = rust_handle.join();
 
     utils::print_status(&status);
+}
+
+fn run_task(
+    description: &str,
+    commands: Vec<(&str, &[&str])>,
+    success_msg: &str,
+    failure_msg: &str,
+) -> String {
+    println!("{}", description.yellow());
+
+    let success = commands
+        .iter()
+        .all(|(cmd, args)| utils::run_command(cmd, args));
+
+    if success {
+        format!("{} {}", "✅".green(), success_msg)
+    } else {
+        format!("{} {}", "❌".red(), failure_msg)
+    }
 }
