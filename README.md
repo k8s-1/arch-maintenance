@@ -1,4 +1,4 @@
-# Arch System Maintenance Tool 🛠️
+# Arch System Maintenance Tool
 
 This Rust-based project is a comprehensive **system maintenance tool for Arch Linux** designed to automate key maintenance tasks, keeping your system clean, optimized, and up-to-date. With a focus on concurrency, efficiency, and simplicity, this tool streamlines several tasks such as updating mirrors, cleaning caches, managing orphaned packages, and updating the system environment, including Rust and Docker.
 
