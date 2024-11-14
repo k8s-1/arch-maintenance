@@ -1,7 +1,7 @@
 use std::fs;
 use std::time::{Duration, SystemTime};
 
-use crate::run_command;
+use crate::utils;
 
 pub fn is_mirrorlist_up_to_date(path: &str) -> bool {
     match fs::metadata(path) {
@@ -36,5 +36,5 @@ pub fn update_mirrorlist(path: &str) -> bool {
         path,
     ];
 
-    run_command("sudo", &args)
+    utils::run_command("sudo", &args)
 }
