@@ -169,5 +169,3 @@ fn main() {
         println!("{:<15}  {:<40}", name, value);
     }
 }
-
-
