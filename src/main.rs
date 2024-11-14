@@ -85,23 +85,25 @@ fn main() {
         "orphans",
         Box::new(|| {
             println!("{}", "Removing orphaned packages...".yellow());
+
             let orphaned_packages = pkg::get_orphaned_packages();
-            if !orphaned_packages.is_empty()
-                && utils::run_command(
-                    "sudo",
-                    &["pacman", "-Rns", &orphaned_packages, "--noconfirm"],
-                )
-            {
-                format!("{} orphaned packages removed", check.green())
-            } else if orphaned_packages.is_empty() {
+
+            let msg = if orphaned_packages.is_empty() {
                 format!("{} no orphaned packages found", check.green())
+            } else if utils::run_command(
+                "sudo",
+                &["pacman", "-Rns", &orphaned_packages, "--noconfirm"],
+            ) {
+                format!("{} orphaned packages removed", check.green())
             } else {
                 format!(
                     "{} failed to remove orphaned packages: {}",
                     cross.red(),
                     orphaned_packages
                 )
-            }
+            };
+
+            msg
         }),
     );
 
