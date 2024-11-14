@@ -100,8 +100,6 @@ fn main() {
             run_task(
                 "pruning cache...",
                 vec![("sudo", &["paccache", "-rk1"])],
-                "cache pruned",
-                "cache prune failed",
             )
         }),
     );
@@ -116,8 +114,6 @@ fn main() {
                     ("rm", &["-rf", "~/.cache/*"]),
                     ("sudo", &["rm", "-rf", "/tmp/*"]),
                 ],
-                "cache cleaned",
-                "cache directory clean-up failed",
             )
         }),
     );
@@ -129,8 +125,6 @@ fn main() {
             run_task(
                 "cleaning docker objects...",
                 vec![("docker", &["system", "prune", "-af"])],
-                "docker cleaned",
-                "docker clean-up failed",
             )
         }),
     );
@@ -142,8 +136,6 @@ fn main() {
             run_task(
                 "updating rust...",
                 vec![("rustup", &["update"])],
-                "rust updated",
-                "rust update failed",
             )
         }),
     );
@@ -160,8 +152,6 @@ fn main() {
 fn run_task(
     description: &str,
     commands: Vec<(&str, &[&str])>,
-    success_msg: &str,
-    failure_msg: &str,
 ) -> String {
     println!("{}", description.yellow());
 
@@ -170,8 +160,8 @@ fn run_task(
         .all(|(cmd, args)| utils::run_command(cmd, args));
 
     if success {
-        format!("{} {}", "✅".green(), success_msg)
+        format!("{} {} succeeded", "✅".green(), description)
     } else {
-        format!("{} {}", "❌".red(), failure_msg)
+        format!("{} {} failed", "❌".red(), description)
     }
 }
