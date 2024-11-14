@@ -1,6 +1,6 @@
 #!/bin/bash
 
-LICENSE_HEADER="./license_header.txt"
+LICENSE_HEADER="./license-header.txt"
 for file in ./src/*rs; do
     if ! grep -q "License" "$file"; then
         cat "$LICENSE_HEADER" "$file" #> temp && mv temp "$file"
