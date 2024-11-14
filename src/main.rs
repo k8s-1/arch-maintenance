@@ -108,7 +108,6 @@ fn main() {
         }),
     );
 
-
     let cache_handle = spawn_task(
         Arc::clone(&status),
         "cache",
