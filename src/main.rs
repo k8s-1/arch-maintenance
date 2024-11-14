@@ -20,7 +20,6 @@ struct Status {
 fn main() {
     let check = "✅";
     let cross = "❌";
-
     let status = Arc::new(Mutex::new(Status::default()));
 
     {
