@@ -1,7 +1,7 @@
 use std::process::Command;
 use colored::*;
+use std::sync::Mutex;
 
-use crate::Mutex;
 use crate::Status;
 
 pub fn run_command(cmd: &str, args: &[&str]) -> bool {
