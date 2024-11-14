@@ -1,3 +1,5 @@
+use std::process::Command;
+
 pub fn get_orphaned_packages() -> String {
     let output = Command::new("sudo")
         .args(&["pacman", "-Qtdq"])
