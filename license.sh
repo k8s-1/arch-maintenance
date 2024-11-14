@@ -31,7 +31,7 @@ under the License.
 EOF
 fi
 
-for file in ./src/*rs; do
+for file in ./src/*; do
     if ! grep -q "License" "$file"; then
         cat "$LICENSE_HEADER" "$file" > temp && mv temp "$file"
         echo "Added license to $file"
