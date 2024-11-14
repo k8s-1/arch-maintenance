@@ -14,14 +14,13 @@ software distributed under the License is distributed on an
 "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
 KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
-under the License.    
+under the License.
 */
 
 
+use crate::utils::run_command;
 use std::fs;
 use std::time::{Duration, SystemTime};
-
-use crate::utils;
 
 pub fn is_mirrorlist_up_to_date(path: &str) -> bool {
     fs::metadata(path)
@@ -29,7 +28,8 @@ pub fn is_mirrorlist_up_to_date(path: &str) -> bool {
         .map_or(false, |modified_time| {
             SystemTime::now()
                 .duration_since(modified_time)
-                .map_or(false, |duration| duration < Duration::new(604800, 0)) // 604800 seconds = 1 week
+                .map_or(false, |duration| duration < Duration::new(604800, 0))
+            // 604800 seconds = 1 week
         })
 }
 
@@ -50,5 +50,5 @@ pub fn update_mirrorlist(path: &str) -> bool {
         path,
     ];
 
-    utils::run_command("sudo", &args)
+    run_command("sudo", &args)
 }
