@@ -3,7 +3,7 @@
 LICENSE_HEADER="./license-header"
 
 if [ ! -f ./LICENSE.txt ]; then
-  wget https://www.apache.org/licenses/LICENSE-2.0.txt -O LICENSE.txt
+  wget https://www.apache.org/licenses/LICENSE-2.0.txt -O LICENSE
 fi
 
 if [ ! -f "$LICENSE_HEADER" ]; then
