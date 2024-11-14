@@ -6,6 +6,8 @@ This Rust-based project is a comprehensive **system maintenance tool for Arch Li
 
 ## Features
 
+- **Speed + Concurrency**: Runs faster than a shell script.
+
 - **Automatic Mirror Updates**: Refreshes and updates Arch mirrors to ensure you are always connected to the fastest, most up-to-date sources.
 
 - **Package & Key Updates**: Executes system package updates and refreshes keys as needed, ensuring that your system remains secure and current.
