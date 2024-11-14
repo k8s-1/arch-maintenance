@@ -67,19 +67,6 @@ fn main() {
             })
         };
 
-    let prune_handle = spawn_task(
-        Arc::clone(&status),
-        "prune",
-        Box::new(|| {
-            println!("{}", "Pruning cache...".yellow());
-            if utils::run_command("sudo", &["paccache", "-rk1"]) {
-                format!("{} cache pruned", check.green())
-            } else {
-                format!("{} cache prune failed", cross.red())
-            }
-        }),
-    );
-
     let orphans_handle = spawn_task(
         Arc::clone(&status),
         "orphans",
@@ -106,6 +93,21 @@ fn main() {
 
         }),
     );
+
+
+    let prune_handle = spawn_task(
+        Arc::clone(&status),
+        "prune",
+        Box::new(|| {
+            println!("{}", "Pruning cache...".yellow());
+            if utils::run_command("sudo", &["paccache", "-rk1"]) {
+                format!("{} cache pruned", check.green())
+            } else {
+                format!("{} cache prune failed", cross.red())
+            }
+        }),
+    );
+
 
     let cache_handle = spawn_task(
         Arc::clone(&status),
