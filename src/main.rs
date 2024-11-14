@@ -2,7 +2,7 @@ mod mirror;
 mod pkg;
 mod utils;
 
-use colored::*;
+use colored::Colorize;
 use std::sync::{Arc, Mutex};
 use std::thread;
 
@@ -154,6 +154,10 @@ fn main() {
     let _ = docker_handle.join();
     let _ = rust_handle.join();
 
+    print_status(&status);
+}
+
+fn print_status(status: &Mutex<Status>) {
     println!("{:<15}  {:<40}", "Item".yellow(), "Result".yellow());
     let final_status = status.lock().unwrap();
     let fields = [
