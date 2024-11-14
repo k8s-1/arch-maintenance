@@ -1,16 +1,8 @@
 use std::process::Command;
 use colored::*;
 
-#[derive(Default)]
-pub struct Status {
-    pub mirror: String,
-    pub packages: String,
-    pub prune: String,
-    pub orphans: String,
-    pub cache: String,
-    pub docker: String,
-    pub rust: String,
-}
+use crate::Mutex;
+use crate::Status;
 
 pub fn run_command(cmd: &str, args: &[&str]) -> bool {
     Command::new(cmd)

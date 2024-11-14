@@ -152,22 +152,5 @@ fn main() {
     let _ = docker_handle.join();
     let _ = rust_handle.join();
 
-    print_status(&status);
-}
-
-fn print_status(status: &Mutex<Status>) {
-    println!("{:<15}  {:<40}", "Item".yellow(), "Result".yellow());
-    let final_status = status.lock().unwrap();
-    let fields = [
-        ("Mirror", &final_status.mirror),
-        ("Packages", &final_status.packages),
-        ("Prune", &final_status.prune),
-        ("Orphans", &final_status.orphans),
-        ("Cache", &final_status.cache),
-        ("Docker", &final_status.docker),
-        ("Rust", &final_status.rust),
-    ];
-    for (name, value) in fields.iter() {
-        println!("{:<15}  {:<40}", name, value);
-    }
+    utils::print_status(&status);
 }
