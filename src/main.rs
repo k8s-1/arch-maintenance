@@ -6,7 +6,7 @@ use std::thread;
 #[derive(Default)]
 struct Status {
     mirror: String,
-    keys: String,
+    packages: String,
     prune: String,
     orphans: String,
     cache: String,
@@ -18,116 +18,114 @@ fn main() {
     let check = "✅";
     let cross = "❌";
 
-    let mut status = Status::default();
-
-    println!("{}", "Updating mirror list...".yellow());
-    if run_command(
-        "sudo",
-        &[
-            "reflector",
-            "--verbose",
-            "--latest",
-            "10",
-            "--sort",
-            "rate",
-            "--save",
-            "/etc/pacman.d/mirrorlist",
-        ],
-    ) {
-        status.mirror = format!("{} mirror list updated", check.green());
-    } else {
-        status.mirror = format!("{} mirror list update failed", cross.red());
-    }
-
-    println!("{}", "Updating packages and keys...".yellow());
-    if run_command("yay", &["--noconfirm"]) {
-        status.keys = format!("{} packages updated", check.green());
-    } else if run_command("sudo", &["pacman-keys", "--refresh-keys"])
-        && run_command("yay", &["--noconfirm"])
-    {
-        status.keys = format!("{} packages updated and keys refreshed", check.green());
-    } else {
-        status.keys = format!("{} package update and key refresh failed", cross.red());
-    }
-
-    // Wrap status in Arc<Mutex> for thread-safe access
+    // Wrap status in Arc<Mutex> for thread-safe access across all tasks
     let status = Arc::new(Mutex::new(Status::default()));
 
-    // Helper to spawn threads for each task
-    let spawn_task = |task: Box<dyn FnOnce() + Send>| {
-        let handle = thread::spawn(task);
-        handle
+    // Sequential updates for mirror and packages
+    {
+        let mut status_lock = status.lock().unwrap();
+
+        println!("{}", "Updating mirror list...".yellow());
+        if run_command(
+            "sudo",
+            &[
+                "reflector",
+                "--verbose",
+                "--latest",
+                "5",
+                "--sort",
+                "score",
+                "--connection-timeout",
+                "2",
+                "rate",
+                "--save",
+                "/etc/pacman.d/mirrorlist",
+            ],
+        ) {
+            status_lock.mirror = format!("{} mirror list updated", check.green());
+        } else {
+            status_lock.mirror = format!("{} mirror list update failed", cross.red());
+        }
+
+        println!("{}", "Updating packages and keys...".yellow());
+        if run_command("yay", &["--noconfirm"]) {
+            status_lock.packages = format!("{} packages updated", check.green());
+        } else if run_command("sudo", &["pacman-keys", "--refresh-keys"])
+            && run_command("yay", &["--noconfirm"])
+        {
+            status_lock.packages = format!("{} packages updated and keys refreshed", check.green());
+        } else {
+            status_lock.packages = format!("{} package update and key refresh failed", cross.red());
+        }
+    }
+
+    // Helper to spawn threads for each parallel task
+    let spawn_task = |status: Arc<Mutex<Status>>, field: &str, task: Box<dyn FnOnce() -> String + Send>| {
+        let field = field.to_string();
+        thread::spawn(move || {
+            let result = task();
+            let mut status = status.lock().unwrap();
+            match field.as_str() {
+                "prune" => status.prune = result,
+                "orphans" => status.orphans = result,
+                "cache" => status.cache = result,
+                "docker" => status.docker = result,
+                "rust" => status.rust = result,
+                _ => (),
+            }
+        })
     };
 
-    let status_clone = Arc::clone(&status);
-    let prune_handle = spawn_task(Box::new(move || {
+    // Spawn parallel tasks
+    let prune_handle = spawn_task(Arc::clone(&status), "prune", Box::new(|| {
         println!("{}", "Pruning cache...".yellow());
-        let result = if run_command("sudo", &["paccache", "-rk1"]) {
+        if run_command("sudo", &["paccache", "-rk1"]) {
             format!("{} cache pruned", check.green())
         } else {
             format!("{} cache prune failed", cross.red())
-        };
-        status_clone.lock().unwrap().prune = result;
+        }
     }));
 
-    let status_clone = Arc::clone(&status);
-    let orphans_handle = spawn_task(Box::new(move || {
+    let orphans_handle = spawn_task(Arc::clone(&status), "orphans", Box::new(|| {
         println!("{}", "Removing orphaned packages...".yellow());
         let orphaned_packages = get_orphaned_packages();
-        let result = if !orphaned_packages.is_empty()
-            && run_command(
-                "sudo",
-                &["pacman", "-Rns", &orphaned_packages, "--noconfirm"],
-            ) {
+        if !orphaned_packages.is_empty() && run_command("sudo", &["pacman", "-Rns", &orphaned_packages, "--noconfirm"]) {
             format!("{} orphaned packages removed", check.green())
         } else if orphaned_packages.is_empty() {
             format!("{} no orphaned packages found", check.green())
         } else {
-            format!(
-                "{} failed to remove orphaned packages: {}",
-                cross.red(),
-                orphaned_packages
-            )
-        };
-        status_clone.lock().unwrap().orphans = result;
+            format!("{} failed to remove orphaned packages: {}", cross.red(), orphaned_packages)
+        }
     }));
 
-    let status_clone = Arc::clone(&status);
-    let cache_handle = spawn_task(Box::new(move || {
+    let cache_handle = spawn_task(Arc::clone(&status), "cache", Box::new(|| {
         println!("{}", "Cleaning cache directories...".yellow());
-        let result = if run_command("rm", &["-rf", "~/.cache/*"])
-            && run_command("sudo", &["rm", "-rf", "/tmp/*"])
-        {
+        if run_command("rm", &["-rf", "~/.cache/*"]) && run_command("sudo", &["rm", "-rf", "/tmp/*"]) {
             format!("{} cache cleaned", check.green())
         } else {
             format!("{} cache directory clean-up failed", cross.red())
-        };
-        status_clone.lock().unwrap().cache = result;
+        }
     }));
 
-    let status_clone = Arc::clone(&status);
-    let docker_handle = spawn_task(Box::new(move || {
+    let docker_handle = spawn_task(Arc::clone(&status), "docker", Box::new(|| {
         println!("{}", "Cleaning Docker objects...".yellow());
-        let result = if run_command("docker", &["system", "prune", "-af"]) {
+        if run_command("docker", &["system", "prune", "-af"]) {
             format!("{} docker cleaned", check.green())
         } else {
             format!("{} docker clean-up failed", cross.red())
-        };
-        status_clone.lock().unwrap().docker = result;
+        }
     }));
 
-    let status_clone = Arc::clone(&status);
-    let rust_handle = spawn_task(Box::new(move || {
+    let rust_handle = spawn_task(Arc::clone(&status), "rust", Box::new(|| {
         println!("{}", "Updating rust...".yellow());
-        let result = if run_command("rustup", &["update"]) {
+        if run_command("rustup", &["update"]) {
             format!("{} rust updated", check.green())
         } else {
             format!("{} rust update failed", cross.red())
-        };
-        status_clone.lock().unwrap().rust = result;
+        }
     }));
 
-    // Wait for all threads to finish
+    // Wait for all parallel tasks to finish
     let _ = prune_handle.join();
     let _ = orphans_handle.join();
     let _ = cache_handle.join();
@@ -139,7 +137,7 @@ fn main() {
     let final_status = status.lock().unwrap();
     let fields = [
         ("Mirror", &final_status.mirror),
-        ("Keys", &final_status.keys),
+        ("Packages", &final_status.packages),
         ("Prune", &final_status.prune),
         ("Orphans", &final_status.orphans),
         ("Cache", &final_status.cache),
