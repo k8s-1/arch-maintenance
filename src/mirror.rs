@@ -24,19 +24,13 @@ use std::time::{Duration, SystemTime};
 use crate::utils;
 
 pub fn is_mirrorlist_up_to_date(path: &str) -> bool {
-    match fs::metadata(path) {
-        Ok(metadata) => match metadata.modified() {
-            Ok(modified_time) => {
-                let duration_since_modified = SystemTime::now().duration_since(modified_time);
-                let week_in_seconds: u64 = 604800;
-                duration_since_modified
-                    .map(|duration| duration < Duration::new(week_in_seconds, 0))
-                    .unwrap_or(false)
-            }
-            Err(_) => false,
-        },
-        Err(_) => false,
-    }
+    fs::metadata(path)
+        .and_then(|metadata| metadata.modified())
+        .map_or(false, |modified_time| {
+            SystemTime::now()
+                .duration_since(modified_time)
+                .map_or(false, |duration| duration < Duration::new(604800, 0)) // 604800 seconds = 1 week
+        })
 }
 
 pub fn update_mirrorlist(path: &str) -> bool {
