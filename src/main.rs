@@ -1,9 +1,10 @@
+mod mirror;
+mod pkg;
+mod utils;
+
 use colored::*;
-use std::fs;
-use std::process::Command;
 use std::sync::{Arc, Mutex};
 use std::thread;
-use std::time::{Duration, SystemTime};
 
 #[derive(Default)]
 struct Status {
@@ -27,9 +28,9 @@ fn main() {
 
         let mirror_list_path = "/etc/pacman.d/mirrorlist";
 
-        if !is_mirrorlist_up_to_date(mirror_list_path) {
+        if !mirror::is_mirrorlist_up_to_date(mirror_list_path) {
             println!("{}", "Updating mirror list...".yellow());
-            if update_mirrorlist(mirror_list_path) {
+            if mirror::update_mirrorlist(mirror_list_path) {
                 status_lock.mirror = format!("{} mirror list updated", check.green());
             } else {
                 status_lock.mirror = format!("{} mirror list update failed", cross.red());
@@ -40,10 +41,10 @@ fn main() {
         }
 
         println!("{}", "Updating packages and keys...".yellow());
-        if run_command("yay", &["--noconfirm"]) {
+        if utils::run_command("yay", &["--noconfirm"]) {
             status_lock.packages = format!("{} packages updated", check.green());
-        } else if run_command("sudo", &["pacman-keys", "--refresh-keys"])
-            && run_command("yay", &["--noconfirm"])
+        } else if utils::run_command("sudo", &["pacman-keys", "--refresh-keys"])
+            && utils::run_command("yay", &["--noconfirm"])
         {
             status_lock.packages = format!("{} packages updated and keys refreshed", check.green());
         } else {
@@ -73,7 +74,7 @@ fn main() {
         "prune",
         Box::new(|| {
             println!("{}", "Pruning cache...".yellow());
-            if run_command("sudo", &["paccache", "-rk1"]) {
+            if utils::run_command("sudo", &["paccache", "-rk1"]) {
                 format!("{} cache pruned", check.green())
             } else {
                 format!("{} cache prune failed", cross.red())
@@ -86,9 +87,9 @@ fn main() {
         "orphans",
         Box::new(|| {
             println!("{}", "Removing orphaned packages...".yellow());
-            let orphaned_packages = get_orphaned_packages();
+            let orphaned_packages = pkg::get_orphaned_packages();
             if !orphaned_packages.is_empty()
-                && run_command(
+                && utils::run_command(
                     "sudo",
                     &["pacman", "-Rns", &orphaned_packages, "--noconfirm"],
                 )
@@ -111,8 +112,8 @@ fn main() {
         "cache",
         Box::new(|| {
             println!("{}", "Cleaning cache directories...".yellow());
-            if run_command("rm", &["-rf", "~/.cache/*"])
-                && run_command("sudo", &["rm", "-rf", "/tmp/*"])
+            if utils::run_command("rm", &["-rf", "~/.cache/*"])
+                && utils::run_command("sudo", &["rm", "-rf", "/tmp/*"])
             {
                 format!("{} cache cleaned", check.green())
             } else {
@@ -126,7 +127,7 @@ fn main() {
         "docker",
         Box::new(|| {
             println!("{}", "Cleaning Docker objects...".yellow());
-            if run_command("docker", &["system", "prune", "-af"]) {
+            if utils::run_command("docker", &["system", "prune", "-af"]) {
                 format!("{} docker cleaned", check.green())
             } else {
                 format!("{} docker clean-up failed", cross.red())
@@ -139,7 +140,7 @@ fn main() {
         "rust",
         Box::new(|| {
             println!("{}", "Updating rust...".yellow());
-            if run_command("rustup", &["update"]) {
+            if utils::run_command("rustup", &["update"]) {
                 format!("{} rust updated", check.green())
             } else {
                 format!("{} rust update failed", cross.red())
@@ -169,55 +170,4 @@ fn main() {
     }
 }
 
-fn run_command(cmd: &str, args: &[&str]) -> bool {
-    Command::new(cmd)
-        .args(args)
-        .status()
-        .map(|status| status.success())
-        .unwrap_or(false)
-}
 
-fn get_orphaned_packages() -> String {
-    let output = Command::new("sudo")
-        .args(&["pacman", "-Qtdq"])
-        .output()
-        .expect("failed to execute process");
-
-    String::from_utf8_lossy(&output.stdout).trim().to_string()
-}
-
-fn is_mirrorlist_up_to_date(path: &str) -> bool {
-    match fs::metadata(path) {
-        Ok(metadata) => match metadata.modified() {
-            Ok(modified_time) => {
-                let duration_since_modified = SystemTime::now().duration_since(modified_time);
-                let week_in_seconds: u64 = 604800;
-                duration_since_modified
-                    .map(|duration| duration < Duration::new(week_in_seconds, 0))
-                    .unwrap_or(false)
-            }
-            Err(_) => false,
-        },
-        Err(_) => false,
-    }
-}
-
-fn update_mirrorlist(path: &str) -> bool {
-    let args = [
-        "reflector",
-        "--verbose",
-        "--latest",
-        "10",
-        "--sort",
-        "score",
-        "--connection-timeout",
-        "3",
-        "--protocol",
-        "https",
-        "rate",
-        "--save",
-        path,
-    ];
-
-    run_command("sudo", &args)
-}
