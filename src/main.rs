@@ -51,7 +51,6 @@ fn main() {
         }
     }
 
-    // Helper to spawn threads for each parallel task
     let spawn_task =
         |status: Arc<Mutex<Status>>, field: &str, task: Box<dyn FnOnce() -> String + Send>| {
             let field = field.to_string();
@@ -69,7 +68,6 @@ fn main() {
             })
         };
 
-    // Spawn parallel tasks
     let prune_handle = spawn_task(
         Arc::clone(&status),
         "prune",
@@ -149,14 +147,12 @@ fn main() {
         }),
     );
 
-    // Wait for all parallel tasks to finish
     let _ = prune_handle.join();
     let _ = orphans_handle.join();
     let _ = cache_handle.join();
     let _ = docker_handle.join();
     let _ = rust_handle.join();
 
-    // Print final status
     println!("{:<15}  {:<40}", "Item".yellow(), "Result".yellow());
     let final_status = status.lock().unwrap();
     let fields = [
