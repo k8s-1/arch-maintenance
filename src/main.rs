@@ -88,22 +88,22 @@ fn main() {
 
             let orphaned_packages = pkg::get_orphaned_packages();
 
-            let msg = if orphaned_packages.is_empty() {
-                format!("{} no orphaned packages found", check.green())
-            } else if utils::run_command(
-                "sudo",
-                &["pacman", "-Rns", &orphaned_packages, "--noconfirm"],
+            match (
+                orphaned_packages.is_empty(),
+                utils::run_command(
+                    "sudo",
+                    &["pacman", "-Rns", &orphaned_packages, "--noconfirm"],
+                ),
             ) {
-                format!("{} orphaned packages removed", check.green())
-            } else {
-                format!(
+                (true, _) => format!("{} no orphaned packages found", check.green()),
+                (false, true) => format!("{} orphaned packages removed", check.green()),
+                (false, false) => format!(
                     "{} failed to remove orphaned packages: {}",
                     cross.red(),
                     orphaned_packages
-                )
-            };
+                ),
+            }
 
-            msg
         }),
     );
 
