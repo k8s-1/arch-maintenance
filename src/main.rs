@@ -18,9 +18,9 @@ struct Status {
 }
 
 fn main() {
-    let check = "✅";
-    let cross = "❌";
+    let (check, cross) = ("✅", "❌");
     let status = Arc::new(Mutex::new(Status::default()));
+
 
     {
         let mut status_lock = status.lock().unwrap();
