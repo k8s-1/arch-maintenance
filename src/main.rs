@@ -190,7 +190,6 @@ fn get_orphaned_packages() -> String {
     String::from_utf8_lossy(&output.stdout).trim().to_string()
 }
 
-/// Checks if the mirror list file has been updated in the last week
 fn is_mirrorlist_up_to_date(path: &str) -> bool {
     match fs::metadata(path) {
         Ok(metadata) => match metadata.modified() {
@@ -207,7 +206,6 @@ fn is_mirrorlist_up_to_date(path: &str) -> bool {
     }
 }
 
-/// Runs the reflector command to update the mirror list
 fn update_mirrorlist(path: &str) -> bool {
     let args = [
         "reflector",
