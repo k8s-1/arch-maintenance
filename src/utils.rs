@@ -33,8 +33,8 @@ pub fn run_command(cmd: &str, args: &[&str]) -> bool {
 }
 
 pub fn print_status(status: &Mutex<Status>) {
-    println!("{:<15}  {:<40}", "Item".yellow(), "Result".yellow());
     let final_status = status.lock().unwrap();
+    
     let fields = [
         ("Mirror", &final_status.mirror),
         ("Packages", &final_status.packages),
@@ -44,7 +44,12 @@ pub fn print_status(status: &Mutex<Status>) {
         ("Docker", &final_status.docker),
         ("Rust", &final_status.rust),
     ];
+
+    let mut output = format!("{:<15}  {:<40}\n", "Item".yellow(), "Result".yellow());
+
     for (name, value) in fields.iter() {
-        println!("{:<15}  {:<40}", name, value);
+        output.push_str(&format!("{:<15}  {:<40}\n", name, value));
     }
+    
+    println!("{}", output);
 }
