@@ -35,7 +35,8 @@ fn main() {
                 status_lock.mirror = format!("{} mirror list update failed", cross.red());
             }
         } else {
-            println!("{}", "mirror list is up-to-date.".green());
+            println!("{}", "".green());
+            status_lock.mirror = format!("{} mirror list is up-to-date", check.green());
         }
 
         println!("{}", "Updating packages and keys...".yellow());
