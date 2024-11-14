@@ -98,7 +98,7 @@ fn main() {
         "prune",
         Box::new(|| {
             run_task(
-                "Pruning cache...",
+                "pruning cache...",
                 vec![("sudo", &["paccache", "-rk1"])],
                 "cache pruned",
                 "cache prune failed",
@@ -111,7 +111,7 @@ fn main() {
         "cache",
         Box::new(|| {
             run_task(
-                "Cleaning cache directories...",
+                "cleaning cache directories...",
                 vec![
                     ("rm", &["-rf", "~/.cache/*"]),
                     ("sudo", &["rm", "-rf", "/tmp/*"]),
@@ -127,7 +127,7 @@ fn main() {
         "docker",
         Box::new(|| {
             run_task(
-                "Cleaning Docker objects...",
+                "cleaning docker objects...",
                 vec![("docker", &["system", "prune", "-af"])],
                 "docker cleaned",
                 "docker clean-up failed",
@@ -140,7 +140,7 @@ fn main() {
         "rust",
         Box::new(|| {
             run_task(
-                "Updating rust...",
+                "updating rust...",
                 vec![("rustup", &["update"])],
                 "rust updated",
                 "rust update failed",
