@@ -6,23 +6,17 @@ This Rust-based project is a comprehensive **system maintenance tool for Arch Li
 
 ## Features
 
-- **Automatic Mirror Updates**
-  Refreshes and updates Arch mirrors to ensure you are always connected to the fastest, most up-to-date sources.
+- **Automatic Mirror Updates**: Refreshes and updates Arch mirrors to ensure you are always connected to the fastest, most up-to-date sources.
 
-- **Package & Key Updates**
-  Executes system package updates and refreshes keys as needed, ensuring that your system remains secure and current.
+- **Package & Key Updates**: Executes system package updates and refreshes keys as needed, ensuring that your system remains secure and current.
 
-- **Cache Cleanup**
-  Prunes and cleans package and system caches to free up space and improve performance.
+- **Cache Cleanup**: Prunes and cleans package and system caches to free up space and improve performance.
 
-- **Orphaned Package Removal**
-  Identifies and removes orphaned packages no longer needed by the system.
+- **Orphaned Package Removal**: Identifies and removes orphaned packages no longer needed by the system.
 
-- **Docker Pruning**
-  Cleans up unused Docker images, containers, and volumes, ensuring Docker doesn’t consume unnecessary disk space.
+- **Docker Pruning**: Cleans up unused Docker images, containers, and volumes, ensuring Docker doesn’t consume unnecessary disk space.
 
-- **Rust Update**
-  Keeps the Rust toolchain updated to the latest version to ensure compatibility with the latest libraries and tools.
+- **Rust Update**: Keeps the Rust toolchain updated to the latest version to ensure compatibility with the latest libraries and tools.
 
 ---
 
