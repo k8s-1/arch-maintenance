@@ -36,6 +36,6 @@ for file in ./src/*rs; do
         cat "$LICENSE_HEADER" "$file" > temp && mv temp "$file"
         echo "Added license to $file"
     else
-        echo "License already exists in $file"
+        echo "License exists in $file"
     fi
 done
