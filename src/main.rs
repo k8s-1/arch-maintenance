@@ -37,8 +37,10 @@ struct Status {
     rust: String,
 }
 
+const CHECK: &str = "✅";
+const CROSS: &str = "❌";
+
 fn main() {
-    let (check, cross) = ("✅", "❌");
     let status = Arc::new(Mutex::new(Status::default()));
 
     {
@@ -49,24 +51,24 @@ fn main() {
         if !mirror::is_mirrorlist_up_to_date(mirror_list_path) {
             println!("{}", "Updating mirror list...".yellow());
             if mirror::update_mirrorlist(mirror_list_path) {
-                status_lock.mirror = format!("{} mirror list updated", check.green());
+                status_lock.mirror = format!("{CHECK} mirror list updated");
             } else {
-                status_lock.mirror = format!("{} mirror list update failed", cross.red());
+                status_lock.mirror = format!("{CROSS} mirror list update failed");
             }
         } else {
             println!("{}", "".green());
-            status_lock.mirror = format!("{} mirror list is up-to-date", check.green());
+            status_lock.mirror = format!("{CHECK} mirror list is up-to-date");
         }
 
         println!("{}", "Updating packages and keys...".yellow());
         if utils::run_command("yay", &["--noconfirm"]) {
-            status_lock.packages = format!("{} packages updated", check.green());
+            status_lock.packages = format!("{CHECK} packages updated");
         } else if utils::run_command("sudo", &["pacman-keys", "--refresh-keys"])
             && utils::run_command("yay", &["--noconfirm"])
         {
-            status_lock.packages = format!("{} packages updated and keys refreshed", check.green());
+            status_lock.packages = format!("{CHECK} packages updated and keys refreshed");
         } else {
-            status_lock.packages = format!("{} package update and key refresh failed", cross.red());
+            status_lock.packages = format!("{CHECK} package update and key refresh failed");
         }
     }
 
@@ -102,12 +104,10 @@ fn main() {
                     &["pacman", "-Rns", &orphaned_packages, "--noconfirm"],
                 ),
             ) {
-                (true, _) => format!("{} no orphaned packages found", check.green()),
-                (false, true) => format!("{} orphaned packages removed", check.green()),
+                (true, _) => format!("{CHECK} no orphaned packages found"),
+                (false, true) => format!("{CHECK} orphaned packages removed"),
                 (false, false) => format!(
-                    "{} failed to remove orphaned packages: {}",
-                    cross.red(),
-                    orphaned_packages
+                    "{CROSS} failed to remove orphaned packages: {orphaned_packages}",
                 ),
             }
         }),
@@ -180,8 +180,8 @@ fn run_task(
         .all(|(cmd, args)| utils::run_command(cmd, args));
 
     if success {
-        format!("{} {} succeeded", "✅".green(), description)
+        format!("{CHECK} {description} succeeded")
     } else {
-        format!("{} {} failed", "❌".red(), description)
+        format!("{CROSS} {description} failed")
     }
 }
