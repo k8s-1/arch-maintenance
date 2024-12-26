@@ -45,7 +45,6 @@ pub fn update_mirrorlist(path: &str) -> bool {
         "3",
         "--protocol",
         "https",
-        "rate",
         "--save",
         path,
     ];
