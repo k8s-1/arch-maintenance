@@ -95,6 +95,7 @@ fn main() {
         Box::new(|| {
             println!("{}", "Removing orphaned packages...".yellow());
 
+            //TODO: this should be a space-separated string of package names 
             let orphaned_packages = pkg::get_orphaned_packages();
 
             match (
