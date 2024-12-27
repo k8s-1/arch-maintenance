@@ -26,5 +26,7 @@ pub fn get_orphaned_packages() -> String {
         .output()
         .expect("failed to execute process");
 
+    //TODO: this should be a space-separated string of package names, remove all new lines and
+    //separate by space
     String::from_utf8_lossy(&output.stdout).trim().to_string()
 }
