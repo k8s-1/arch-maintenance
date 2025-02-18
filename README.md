@@ -34,10 +34,10 @@ This Rust-based project is a comprehensive **system maintenance tool for Arch Li
 
 2. Clone this repository and place the build in /usr/local/bin
 ```bash
-git clone https://github.com/yourusername/arch-maintenance-tool.git
-cd arch-maintenance-tool
-cargo build --release
-mv ./target/release/arch-maintenance-tool /usr/local/bin/
+git clone https://github.com/k8s-1/arch-maintenance.git
+cd arch-maintenance
+make build
+mv ./target/release/arch-maintenance /usr/local/bin/
 
 arch-maintenance-tool
 ```
