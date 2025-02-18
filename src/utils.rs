@@ -45,7 +45,7 @@ pub fn print_status(status: &Mutex<Status>) {
         ("Rust", &final_status.rust),
     ];
 
-    let mut output = format!("{:<15}  {:<40}\n", "Item".yellow(), "Result".yellow());
+    let mut output = format!("\n\n{:<15}  {:<40}\n", "Item".yellow(), "Result".yellow());
 
     for (name, value) in fields.iter() {
         output.push_str(&format!("{:<15}  {:<40}\n", name, value));
