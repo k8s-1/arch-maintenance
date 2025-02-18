@@ -32,14 +32,16 @@ This Rust-based project is a comprehensive **system maintenance tool for Arch Li
    ```
  - User must be in sudoers group
 
-2. Clone this repository and place the build in /usr/local/bin
+2. Clone this repository and build the binary
 ```bash
 git clone https://github.com/k8s-1/arch-maintenance.git
 cd arch-maintenance
 make build
-mv ./target/release/arch-maintenance /usr/local/bin/
+```
 
-arch-maintenance-tool
+3. Create an alias for easy execution
+```
+echo 'alias up="~/rust-maintenance/target/release/rust-maintenance"' >> ~/.bashrc
 ```
 
 ---
