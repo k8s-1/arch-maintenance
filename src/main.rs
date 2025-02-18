@@ -57,7 +57,7 @@ fn main() {
             }
         } else {
             println!("{}", "".green());
-            status_lock.mirror = format!("{CHECK} mirror list is up-to-date");
+            status_lock.mirror = format!("{CHECK} mirror list unchanged");
         }
 
         println!("{}", "Updating packages and keys...".yellow());
@@ -130,7 +130,7 @@ fn main() {
         "cache",
         Box::new(|| {
             run_task(
-                "cleaning cache directories...",
+                "cleaning temp directories...",
                 vec![
                     ("rm", &["-rf", "~/.cache/*"]),
                     ("sudo", &["rm", "-rf", "/tmp/*"]),
@@ -144,7 +144,7 @@ fn main() {
         "docker",
         Box::new(|| {
             run_task(
-                "cleaning docker objects...",
+                "cleaning docker...",
                 vec![("docker", &["system", "prune", "-af"])],
             )
         }),
