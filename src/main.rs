@@ -174,7 +174,7 @@ fn run_task(
     description: &str,
     commands: Vec<(&str, &[&str])>,
 ) -> String {
-    println!("{}", description.yellow());
+    println!("\n{}", description.yellow());
 
     let success = commands
         .iter()
