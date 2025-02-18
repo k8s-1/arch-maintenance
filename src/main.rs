@@ -19,12 +19,12 @@ under the License.
 
 
 mod mirror;
-mod pkg;
 mod utils;
 
 use colored::Colorize;
 use std::sync::{Arc, Mutex};
 use std::thread;
+use std::process::{Command, Stdio};
 
 #[derive(Default)]
 struct Status {
@@ -95,22 +95,22 @@ fn main() {
         Box::new(|| {
             println!("{}", "Removing orphaned packages...".yellow());
 
-            //TODO: this should be a space-separated string of package names 
-            let orphaned_packages = pkg::get_orphaned_packages();
+            let list_orphans_child = Command::new("sudo")
+                .arg("pacman -Qtdq")
+                .stdout(Stdio::piped())
+                .spawn()
+                .expect("Failed to start orphaned packages list process.");
 
-            match (
-                orphaned_packages.is_empty(),
-                utils::run_command(
-                    "sudo",
-                    &["pacman", "-Rns", &orphaned_packages, "--noconfirm"],
-                ),
-            ) {
-                (true, _) => format!("{CHECK} no orphaned packages found"),
-                (false, true) => format!("{CHECK} orphaned packages removed"),
-                (false, false) => format!(
-                    "{CROSS} failed to remove orphaned packages: {orphaned_packages}",
-                ),
-            }
+            let list_orphans_out = list_orphans_child.stdout.expect("Failed to open orphaned packages list output.");
+
+            Command::new("xargs")
+                .arg("sudo pacman -Rns --noconfirm")
+                .stdin(Stdio::from(list_orphans_out))
+                .stdout(Stdio::piped())
+                .spawn()
+                .expect("Failed to start orhpaned package removal process");
+
+            format!("{CHECK} orphaned package removal complete")
         }),
     );
 
